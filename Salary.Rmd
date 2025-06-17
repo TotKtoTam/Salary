@@ -1,0 +1,101 @@
+---
+title: "projekt"
+output:
+  pdf_document: default
+  html_document: default
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+The appendix contains data on starting salaries and personal information of high school graduates and above for each simulation study. Please use this data for the following analysis and provide a text explanation and report on the findings based on the statistical results below. The report should be approximately 3-5 pages long, including text and charts.
+
+1 Draw a histogram of salaries (choose your own bin width).
+
+2 Provide descriptive statistics for salaries, including sample mean, standard deviation, minimum, Q1, median, Q3, and maximum.
+
+3 Calculate correlation coefficients between salaries and personal information (years of education, number of siblings, gender). Assign a numeric value of 1 for males and 0 for females.
+
+4 Divide years of education into 18 years or more and less than 18 years. Try to check whether salary is related to the number of years of education.
+
+5 Try to check if salary is related to gender.
+
+(Hint: For questions 3 and 4, perform a two-sample t-test)
+
+
+```{r}
+library(readxl)
+library(tidyverse)
+library(ggplot2)
+data <- read_xlsx("C:\\Users\\Asus\\Downloads\\data1_5.xlsx")
+```
+
+```{r}
+Salary <- data$Salary
+Sex <- data$Sex
+Age <- data$Age
+Family <- data$Family
+```
+
+```{r}
+dan <- data.frame(Salary, Sex)
+ggplot(dan, aes(x = Salary,  fill = Sex))+
+geom_histogram(color = "black", position = "identity", bins = 20)+
+  labs(title = "Histogram of salary", x = "", y = "") ## ????
+```
+
+```{r}
+summary_stats <- summary(Salary)
+mean_salary <- mean(Salary)
+sd_salary <- sd(Salary)
+min_salary <- min(Salary)
+q1_salary <- quantile(Salary, 0.25)
+median_salary <- median(Salary)
+q3_salary <- quantile(Salary, 0.75)
+max_salary <- max(Salary)
+print("Statistic:")
+print(summary_stats)
+cat("\n")
+print(paste("Sample mean: ", mean_salary))
+print(paste("Standard deviation: ", sd_salary))
+print(paste("Minimum value: ", min_salary))
+print(paste("Q1: ", q1_salary))
+print(paste("Median: ", median_salary))
+print(paste("Q3: ", q3_salary))
+print(paste("Maximum value: ", max_salary))
+```
+
+```{r}
+data$Gender <- ifelse(data$Sex == "M", 1, 0)
+cor_matrix <- cor(data[, c("Age", "Family", "Salary", "Gender")])
+print(cor_matrix)
+```
+
+```{r}
+less_18_sal <- data$Salary[data$Age < 18]
+more_18_sal <- data$Salary[data$Age > 18]
+equal_18_sal <- data$Salary[data$Age == 18]
+
+cor_less_18 <- cor(data$Age[data$Age < 18], less_18_sal)
+cor_more_18 <- cor(data$Age[data$Age > 18], more_18_sal)
+cor_equal_18 <- cor(data$Age[data$Age == 18], equal_18_sal)
+
+cat("For less then 18:", cor_less_18, "\n")
+cat("For more then 18", cor_more_18, "\n")
+cat("For equal 18:", cor_equal_18, "\n")  ## ????
+```
+
+```{r}
+Salary_m <- data$Salary[1:10]
+Salary_f <- data$Salary[11:20]
+t_test_result_salary <- t.test(Salary_m, Salary_f)
+print(t_test_result_salary)
+
+  dan3 <- data.frame(Sum_salary = c(Salary_m, Salary_f), 
+                     Sex = factor(rep(c("Male", "Female"), each = 10)))
+  boxplot(Sum_salary ~ Sex, dan3, col = c("pink", "blue"))
+  legend("topright", legend = levels(dan3$Sex), fill = c("pink", "blue"))
+```
+
